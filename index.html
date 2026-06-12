@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus AI — Премиальный AI-ассистент</title>
+  <meta name="description" content="Nexus AI — общайся с GPT-4o, Claude, Gemini. Генерируй сайты, код, изображения. Всё в одном приложении." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #000000;
+      --bg1: #08080f;
+      --bg2: #0f0f1a;
+      --card: #0d0d18;
+      --accent: #6366F1;
+      --accent-bright: #818CF8;
+      --accent-glow: rgba(99,102,241,0.3);
+      --text: #F8F8FF;
+      --text-sec: #A1A1C0;
+      --text-muted: #5C5C7A;
+      --border: rgba(255,255,255,0.07);
+      --border-accent: rgba(99,102,241,0.3);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e30; border-radius: 3px; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, #818CF8, #6366F1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; box-shadow: 0 0 20px rgba(99,102,241,0.4);
+    }
+    .nav-logo-text { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { color: var(--text-sec); font-size: 14px; text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .lang-switcher {
+      display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .lang-btn {
+      padding: 5px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+      background: transparent; border: none; color: var(--text-muted);
+      font-family: inherit; transition: all 0.15s;
+    }
+    .lang-btn.active { background: rgba(99,102,241,0.2); color: var(--accent-bright); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; font-family: inherit; cursor: pointer; font-weight: 600; transition: all 0.2s; text-decoration: none; border: none; }
+    .btn-ghost { padding: 8px 16px; font-size: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-sec); }
+    .btn-ghost:hover { border-color: var(--border-accent); color: var(--text); }
+    .btn-primary { padding: 10px 22px; font-size: 14px; background: linear-gradient(135deg, #818CF8, #6366F1); color: #fff; box-shadow: 0 0 24px rgba(99,102,241,0.35); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(99,102,241,0.5); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-orb {
+      position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px);
+    }
+    .orb1 { width: 600px; height: 600px; background: rgba(99,102,241,0.15); top: -200px; left: 50%; transform: translateX(-50%); }
+    .orb2 { width: 400px; height: 400px; background: rgba(99,102,241,0.08); bottom: 0; right: -100px; }
+    .orb3 { width: 300px; height: 300px; background: rgba(6,182,212,0.06); bottom: 100px; left: -80px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border-accent); border-radius: 99px;
+      padding: 6px 16px; font-size: 12px; font-weight: 600;
+      color: var(--accent-bright); background: rgba(99,102,241,0.08);
+      margin-bottom: 28px; animation: fadeUp 0.6s ease both;
+      white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+    }
+    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright); animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+    .hero h1 {
+      font-size: clamp(42px, 7vw, 88px); font-weight: 900; letter-spacing: -2px; line-height: 1.05;
+      margin-bottom: 24px; animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .grad-text {
+      background: linear-gradient(135deg, #fff 30%, #818CF8 70%, #6366F1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(16px, 2vw, 20px); color: var(--text-sec); max-width: 560px;
+      line-height: 1.65; margin-bottom: 40px; animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.6s 0.3s ease both; }
+    .btn-primary-lg { padding: 14px 32px; font-size: 16px; border-radius: 14px; box-shadow: 0 0 40px rgba(99,102,241,0.4); }
+    .btn-ghost-lg { padding: 14px 28px; font-size: 16px; border-radius: 14px; }
+    .hero-note { margin-top: 16px; font-size: 12px; color: var(--text-muted); animation: fadeUp 0.6s 0.4s ease both; }
+
+    /* ── MODELS TICKER ── */
+    .ticker-wrap {
+      padding: 40px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      overflow: hidden; position: relative;
+    }
+    .ticker-wrap::before, .ticker-wrap::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none;
+    }
+    .ticker-wrap::before { left: 0; background: linear-gradient(to right, #000, transparent); }
+    .ticker-wrap::after { right: 0; background: linear-gradient(to left, #000, transparent); }
+    .ticker-track {
+      display: flex; gap: 32px; width: max-content;
+      animation: ticker 28s linear infinite;
+    }
+    @keyframes ticker { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+    .ticker-item {
+      display: flex; align-items: center; gap: 10px; white-space: nowrap;
+      font-size: 14px; font-weight: 500; color: var(--text-muted);
+      padding: 8px 20px; border: 1px solid var(--border); border-radius: 99px;
+      background: rgba(255,255,255,0.02);
+    }
+    .ticker-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── SECTION ── */
+    section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent-bright); margin-bottom: 16px;
+    }
+    .section-title { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-bottom: 16px; }
+    .section-sub { font-size: 17px; color: var(--text-sec); line-height: 1.65; max-width: 520px; }
+
+    /* ── FEATURES GRID ── */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px; margin-top: 64px; border: 1px solid var(--border); border-radius: 24px; overflow: hidden; }
+    .feature-card {
+      background: var(--card); padding: 36px 32px; position: relative; overflow: hidden;
+      transition: background 0.2s;
+    }
+    .feature-card:hover { background: rgba(99,102,241,0.05); }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-accent), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feature-icon svg { display: block; }
+    .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.3px; }
+    .feature-card p { font-size: 14px; color: var(--text-sec); line-height: 1.65; }
+
+    /* ── HOW IT WORKS ── */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: 64px; }
+    .step { position: relative; padding: 32px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); }
+    .step-num {
+      font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--accent-bright);
+      background: rgba(99,102,241,0.1); border: 1px solid var(--border-accent);
+      border-radius: 99px; padding: 4px 12px; display: inline-block; margin-bottom: 16px;
+    }
+    .step h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: var(--text-sec); line-height: 1.6; }
+
+    /* ── PRICING ── */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 64px; }
+    .price-card {
+      border: 1px solid var(--border); border-radius: 24px; padding: 36px 32px;
+      background: var(--card); position: relative; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .price-card:hover { transform: translateY(-4px); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+    .price-card.popular {
+      border-color: var(--border-accent);
+      background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, var(--card) 100%);
+      box-shadow: 0 0 60px rgba(99,102,241,0.15);
+    }
+    .popular-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #818CF8, #6366F1); color: #fff;
+      font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 99px;
+      white-space: nowrap; letter-spacing: 0.5px;
+    }
+    .price-name { font-size: 14px; font-weight: 600; color: var(--text-sec); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .price-amount { font-size: 48px; font-weight: 900; letter-spacing: -2px; line-height: 1; margin-bottom: 4px; }
+    .price-amount span { font-size: 18px; font-weight: 500; color: var(--text-muted); }
+    .price-period { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+    .price-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .price-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-sec); }
+    .price-features li .check { color: #10B981; flex-shrink: 0; margin-top: 1px; }
+    .price-features li .x { color: var(--text-muted); flex-shrink: 0; margin-top: 1px; }
+    .btn-plan { width: 100%; padding: 13px; border-radius: 12px; font-size: 15px; }
+    .btn-outline { border: 1px solid var(--border); background: transparent; color: var(--text-sec); }
+    .btn-outline:hover { border-color: var(--border-accent); color: var(--text); }
+
+    /* ── BILLING TOGGLE ── */
+    .billing-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin: 40px auto 0; width: fit-content;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px;
+      position: relative;
+    }
+    .toggle-btn {
+      padding: 8px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      border: none; background: transparent; color: var(--text-muted); cursor: pointer;
+      font-family: inherit; transition: all 0.2s;
+    }
+    .toggle-btn.active { background: var(--accent); color: #fff; }
+    .toggle-badge {
+      position: absolute; top: -10px; right: -10px;
+      background: #10B981; color: #fff; font-size: 10px; font-weight: 800;
+      padding: 2px 8px; border-radius: 99px; letter-spacing: 0.5px;
+    }
+
+    /* ── CREDIT BAR ── */
+    .credit-bar-wrap {
+      height: 4px; background: rgba(255,255,255,0.06); border-radius: 99px;
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .credit-bar { height: 100%; background: linear-gradient(90deg, #6366F1, #818CF8); border-radius: 99px; transition: width 0.4s; }
+
+    /* ── ULTRA CARD ── */
+    .ultra-card {
+      border-color: rgba(99,102,241,0.25);
+      background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, var(--card) 60%, rgba(168,85,247,0.04) 100%);
+    }
+    .ultra-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #7C3AED, #6366F1); color: #fff;
+      font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 99px;
+      white-space: nowrap; letter-spacing: 0.5px;
+    }
+    .btn-ultra-btn {
+      width: 100%; padding: 13px; border-radius: 12px; font-size: 15px; font-weight: 700;
+      background: linear-gradient(135deg, #7C3AED, #6366F1); color: #fff;
+      border: none; cursor: pointer; font-family: inherit; text-align: center;
+      display: block; transition: all 0.2s; text-decoration: none;
+      box-shadow: 0 0 24px rgba(99,102,241,0.3);
+    }
+    .btn-ultra-btn:hover { transform: translateY(-1px); box-shadow: 0 0 40px rgba(99,102,241,0.5); }
+
+    /* ── CREDIT INFO ── */
+    .credit-info {
+      margin-top: 56px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px 32px; max-width: 720px; margin-left: auto; margin-right: auto;
+    }
+    .credit-info-title { font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+    .credit-rows { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .credit-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .model-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .model-name { flex: 1; color: var(--text-sec); }
+    .model-cost { color: var(--text); font-weight: 600; font-size: 13px; }
+    .credit-topup {
+      font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border);
+      padding-top: 16px; line-height: 1.6;
+    }
+    .credit-topup span { color: var(--accent-bright); font-weight: 600; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 64px; }
+    .testi-card {
+      border: 1px solid var(--border); border-radius: 20px; padding: 28px;
+      background: var(--card); transition: border-color 0.2s;
+    }
+    .testi-card:hover { border-color: var(--border-accent); }
+    .testi-stars { color: #F59E0B; font-size: 14px; margin-bottom: 16px; letter-spacing: 2px; }
+    .testi-text { font-size: 15px; line-height: 1.65; color: var(--text-sec); margin-bottom: 20px; }
+    .testi-author { display: flex; align-items: center; gap: 10px; }
+    .testi-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .testi-name { font-size: 14px; font-weight: 600; }
+    .testi-role { font-size: 12px; color: var(--text-muted); }
+
+    /* ── FAQ ── */
+    .faq { display: flex; flex-direction: column; gap: 12px; margin-top: 64px; max-width: 760px; }
+    .faq-item { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--card); }
+    .faq-q {
+      padding: 20px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      user-select: none; transition: background 0.15s;
+    }
+    .faq-q:hover { background: rgba(255,255,255,0.03); }
+    .faq-icon { font-size: 18px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+    .faq-a { display: none; padding: 0 24px 20px; font-size: 14px; color: var(--text-sec); line-height: 1.7; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 100px 24px; text-align: center;
+      background: linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.05) 50%, transparent 100%);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .cta-orb {
+      position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      background: rgba(99,102,241,0.12); filter: blur(100px);
+      top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+    }
+    .cta-section h2 { font-size: clamp(32px, 5vw, 60px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 16px; position: relative; }
+    .cta-section p { font-size: 18px; color: var(--text-sec); margin-bottom: 40px; position: relative; }
+    .cta-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; position: relative; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 60px 40px 40px;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 40px;
+    }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 40px; }
+    .footer-brand p { font-size: 13px; color: var(--text-muted); margin-top: 10px; max-width: 260px; line-height: 1.6; }
+    .footer-links { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: var(--text-sec); text-decoration: none; margin-bottom: 10px; transition: color 0.15s; }
+    .footer-col a:hover { color: var(--text); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--border); padding-top: 28px; }
+    .footer-bottom p { font-size: 12px; color: var(--text-muted); }
+
+    /* ── STATS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-top: 80px; }
+    .stat-item { background: var(--card); padding: 32px 24px; text-align: center; }
+    .stat-val { font-size: 42px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+    .stat-val.grad-text { background: linear-gradient(135deg, #fff, #818CF8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      section { padding: 70px 20px; }
+      footer { padding: 40px 20px 30px; }
+      .footer-top { flex-direction: column; }
+      .hero-badge { font-size: 11px; padding: 5px 12px; max-width: calc(100vw - 48px); }
+      .hero-badge > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .mockup-wrap { margin-top: 48px; }
+    }
+    /* hero content z-index */
+    .hero > *:not(.hero-orb) { position: relative; z-index: 1; }
+
+    /* ── ANIMATIONS ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── CHAT MOCKUP ── */
+    .mockup-wrap {
+      margin-top: 80px; position: relative; max-width: 860px; margin-left: auto; margin-right: auto;
+    }
+    .mockup {
+      border: 1px solid rgba(99,102,241,0.25); border-radius: 20px; overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 60px rgba(99,102,241,0.1);
+      background: #0a0a14;
+    }
+    .mockup-bar {
+      display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .mock-msg { display: flex; gap: 12px; align-items: flex-start; }
+    .mock-avatar { width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .mock-bubble { border-radius: 14px; padding: 12px 16px; font-size: 14px; line-height: 1.6; max-width: 520px; }
+    .mock-user .mock-bubble { background: linear-gradient(135deg, #6366F1, #818CF8); color: #fff; margin-left: auto; }
+    .mock-ai .mock-bubble { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: var(--text-sec); }
+    .mock-input {
+      margin: 0 24px 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .mock-input span { font-size: 14px; color: var(--text-muted); }
+    .mock-send { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, #818CF8, #6366F1); display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">✦</div>
+    <span class="nav-logo-text">Nexus AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features" data-ru="Возможности" data-en="Features">Возможности</a>
+    <a href="#how" data-ru="Как работает" data-en="How it works">Как работает</a>
+    <a href="#pricing" data-ru="Цены" data-en="Pricing">Цены</a>
+    <a href="#faq" data-ru="FAQ" data-en="FAQ">FAQ</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <a href="#pricing" class="btn btn-primary" data-ru="Начать бесплатно" data-en="Start for free">Начать бесплатно</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-badge">
+    <span></span>
+    <span data-ru="GPT-4o · Claude · Gemini · DeepSeek — всё в одном" data-en="GPT-4o · Claude · Gemini · DeepSeek — all in one">GPT-4o · Claude · Gemini · DeepSeek — всё в одном</span>
+  </div>
+
+  <h1>
+    <span data-ru="Твой AI-ассистент" data-en="Your AI assistant"><span class="grad-text">Твой AI-ассистент</span></span><br />
+    <span data-ru="нового уровня" data-en="next level">нового уровня</span>
+  </h1>
+
+  <p data-ru="Общайся с лучшими AI-моделями, генерируй сайты, пиши код и создавай изображения. Один инструмент — бесконечные возможности." data-en="Chat with the best AI models, generate websites, write code and create images. One tool — endless possibilities.">
+    Общайся с лучшими AI-моделями, генерируй сайты, пиши код и создавай изображения. Один инструмент — бесконечные возможности.
+  </p>
+
+  <div class="hero-cta">
+    <a href="#pricing" class="btn btn-primary btn-primary-lg" data-ru="✦ Начать бесплатно" data-en="✦ Start for free">✦ Начать бесплатно</a>
+    <a href="#features" class="btn btn-ghost btn-ghost-lg" data-ru="Узнать больше" data-en="Learn more">Узнать больше</a>
+  </div>
+  <p class="hero-note" data-ru="Кредитная карта не нужна · Free план навсегда" data-en="No credit card required · Free plan forever">
+    Кредитная карта не нужна · Free план навсегда
+  </p>
+
+  <!-- Chat Mockup -->
+  <div class="mockup-wrap reveal">
+    <div class="mockup">
+      <div class="mockup-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 12px;margin-left:8px;font-size:12px;color:rgba(255,255,255,0.3);">nexus.ai · Claude Sonnet 4</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mock-msg mock-user" style="justify-content:flex-end;">
+          <div class="mock-bubble" data-ru="Сделай лендинг для SaaS стартапа в стиле Vercel" data-en="Build a SaaS landing page in Vercel style">Сделай лендинг для SaaS стартапа в стиле Vercel</div>
+          <div class="mock-avatar" style="background:linear-gradient(135deg,#818CF8,#6366F1);">V</div>
+        </div>
+        <div class="mock-msg mock-ai">
+          <div class="mock-avatar" style="background:linear-gradient(135deg,#818CF8,#6366F1);box-shadow:0 0 12px rgba(99,102,241,0.4);">✦</div>
+          <div class="mock-bubble" data-ru="Генерирую сайт... Создаю Hero с gradient mesh, добавляю секции Features, Pricing, FAQ. Использую Next.js + Tailwind стек.
+
+✅ Сайт готов — 247 строк HTML, адаптивный, с анимациями." data-en="Generating site... Creating Hero with gradient mesh, adding Features, Pricing, FAQ sections. Using Next.js + Tailwind stack.
+
+✅ Site ready — 247 lines of HTML, responsive, with animations.">Генерирую сайт... Создаю Hero с gradient mesh, добавляю секции Features, Pricing, FAQ. Использую Next.js + Tailwind стек.<br /><br />✅ Сайт готов — 247 строк HTML, адаптивный, с анимациями.</div>
+        </div>
+      </div>
+      <div class="mock-input">
+        <span data-ru="Напиши Nexus AI или скажи 'сделай сайт'..." data-en="Message Nexus AI or say 'build a website'...">Напиши Nexus AI или скажи 'сделай сайт'...</span>
+        <div class="mock-send">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker">
+    <!-- duplicated for seamless loop -->
+  </div>
+</div>
+
+<!-- ── STATS ── -->
+<section>
+  <div class="stats-row reveal">
+    <div class="stat-item">
+      <div class="stat-val grad-text">15+</div>
+      <div class="stat-label" data-ru="AI-моделей" data-en="AI Models">AI-моделей</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val grad-text">∞</div>
+      <div class="stat-label" data-ru="Контекст на Pro" data-en="Context on Pro">Контекст на Pro</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val grad-text">&lt;1s</div>
+      <div class="stat-label" data-ru="Первый ответ" data-en="First response">Первый ответ</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val grad-text">6</div>
+      <div class="stat-label" data-ru="Инструментов" data-en="Built-in tools">Инструментов</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section id="features">
+  <div class="reveal">
+    <div class="section-label" data-ru="Возможности" data-en="Features">Возможности</div>
+    <div class="section-title" data-ru="Всё что нужно<br/>в одном месте" data-en="Everything you need<br/>in one place">Всё что нужно<br/>в одном месте</div>
+    <div class="section-sub" data-ru="Не переключайся между инструментами. Nexus AI объединяет лучшие AI-модели, генерацию кода, сайтов и изображений." data-en="Stop switching between tools. Nexus AI combines the best AI models, code generation, websites and images.">Не переключайся между инструментами. Nexus AI объединяет лучшие AI-модели, генерацию кода, сайтов и изображений.</div>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(99,102,241,0.15);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a4 4 0 0 1 4 4v1h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v1a4 4 0 0 1-8 0v-1H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4z"/>
+          <circle cx="9.5" cy="10.5" r="1" fill="#818CF8" stroke="none"/>
+          <circle cx="14.5" cy="10.5" r="1" fill="#818CF8" stroke="none"/>
+          <path d="M9.5 15.5s.8 1 2.5 1 2.5-1 2.5-1"/>
+          <path d="M6 8l-2-2M18 8l2-2"/>
+        </svg>
+      </div>
+      <h3 data-ru="15+ AI-моделей" data-en="15+ AI Models">15+ AI-моделей</h3>
+      <p data-ru="GPT-4o, Claude Fable 5, Opus 4.7, Sonnet 4, Gemini 2.5 Pro, DeepSeek, Qwen, Kimi и другие. Выбирай лучшую модель для каждой задачи." data-en="GPT-4o, Claude Fable 5, Opus 4.7, Sonnet 4, Gemini 2.5 Pro, DeepSeek, Qwen, Kimi and more. Pick the best model for each task.">GPT-4o, Claude Fable 5, Opus 4.7, Sonnet 4, Gemini 2.5 Pro, DeepSeek, Qwen, Kimi и другие. Выбирай лучшую модель для каждой задачи.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(6,182,212,0.15);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </div>
+      <h3 data-ru="Генератор сайтов" data-en="Website Generator">Генератор сайтов</h3>
+      <p data-ru="Опиши идею — получи готовый сайт за секунды. Скачай HTML или разверни сразу. Поддержка редактирования через чат." data-en="Describe your idea — get a ready website in seconds. Download HTML or deploy instantly. Edit via chat.">Опиши идею — получи готовый сайт за секунды. Скачай HTML или разверни сразу. Поддержка редактирования через чат.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.15);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+          <line x1="12" y1="2" x2="12" y2="22" opacity="0.4"/>
+        </svg>
+      </div>
+      <h3 data-ru="Code Editor" data-en="Code Editor">Code Editor</h3>
+      <p data-ru="Встроенный редактор кода с подсветкой синтаксиса и AI-автодополнением. Пиши, отлаживай и запускай прямо в браузере." data-en="Built-in code editor with syntax highlighting and AI autocomplete. Write, debug and run directly in browser.">Встроенный редактор кода с подсветкой синтаксиса и AI-автодополнением. Пиши, отлаживай и запускай прямо в браузере.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.15);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5" fill="#F59E0B" stroke="none"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <h3 data-ru="Image Generator" data-en="Image Generator">Image Generator</h3>
+      <p data-ru="Генерация изображений по тексту через топовые модели. Реалистичные фото, иллюстрации, UI-мокапы — всё за секунды." data-en="Text-to-image generation via top models. Realistic photos, illustrations, UI mockups — all in seconds.">Генерация изображений по тексту через топовые модели. Реалистичные фото, иллюстрации, UI-мокапы — всё за секунды.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(236,72,153,0.15);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EC4899" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <h3 data-ru="AI Agent" data-en="AI Agent">AI Agent</h3>
+      <p data-ru="Автономный агент для сложных задач. Планирует, выполняет шаги, использует инструменты и доставляет результат." data-en="Autonomous agent for complex tasks. Plans, executes steps, uses tools and delivers results.">Автономный агент для сложных задач. Планирует, выполняет шаги, использует инструменты и доставляет результат.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(99,102,241,0.15);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+      </div>
+      <h3 data-ru="Свой API ключ" data-en="Your own API key">Свой API ключ</h3>
+      <p data-ru="Подключи свой OpenRouter ключ и пользуйся без лимитов. Полный контроль над расходами и моделями." data-en="Connect your OpenRouter key and use without limits. Full control over costs and models.">Подключи свой OpenRouter ключ и пользуйся без лимитов. Полный контроль над расходами и моделями.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how" style="background:linear-gradient(180deg,transparent,rgba(99,102,241,0.03),transparent); max-width:100%; padding-left:0; padding-right:0;">
+  <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+    <div class="reveal">
+      <div class="section-label" data-ru="Как работает" data-en="How it works">Как работает</div>
+      <div class="section-title" data-ru="Три шага до результата" data-en="Three steps to results">Три шага до результата</div>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3 data-ru="Выбери модель" data-en="Choose a model">Выбери модель</h3>
+        <p data-ru="GPT-4o для скорости, Claude для анализа, Gemini для мультимедиа. Или подключи свой ключ." data-en="GPT-4o for speed, Claude for analysis, Gemini for multimedia. Or connect your own key.">GPT-4o для скорости, Claude для анализа, Gemini для мультимедиа. Или подключи свой ключ.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3 data-ru="Опиши задачу" data-en="Describe the task">Опиши задачу</h3>
+        <p data-ru="Пиши как другу. Nexus понимает контекст, задаёт уточняющие вопросы и выбирает лучший подход." data-en="Write like to a friend. Nexus understands context, asks clarifying questions and picks the best approach.">Пиши как другу. Nexus понимает контекст, задаёт уточняющие вопросы и выбирает лучший подход.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3 data-ru="Получи результат" data-en="Get results">Получи результат</h3>
+        <p data-ru="Текст, код, сайт, изображение или полный отчёт — готово за секунды. Скопируй, скачай или продолжай итерировать." data-en="Text, code, website, image or full report — ready in seconds. Copy, download or keep iterating.">Текст, код, сайт, изображение или полный отчёт — готово за секунды. Скопируй, скачай или продолжай итерировать.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="pricing">
+  <div class="reveal">
+    <div class="section-label" data-ru="Тарифы" data-en="Pricing">Тарифы</div>
+    <div class="section-title" data-ru="Просто выбери план.<br/>Кредиты — ваша валюта." data-en="Pick a plan.<br/>Credits are your currency.">Просто выбери план.<br/>Кредиты — ваша валюта.</div>
+    <div class="section-sub" data-ru="Каждый запрос тратит кредиты. Дорогие модели — больше кредитов. Вы всегда знаете за что платите." data-en="Every request spends credits. Expensive models cost more. You always know what you pay for.">Каждый запрос тратит кредиты. Дорогие модели — больше кредитов. Вы всегда знаете за что платите.</div>
+  </div>
+
+  <!-- Billing toggle -->
+  <div class="billing-toggle reveal">
+    <button class="toggle-btn active" id="toggle-monthly" onclick="setBilling('monthly')" data-ru="Ежемесячно" data-en="Monthly">Ежемесячно</button>
+    <button class="toggle-btn" id="toggle-annual" onclick="setBilling('annual')" data-ru="Ежегодно" data-en="Annually">Ежегодно</button>
+    <span class="toggle-badge" data-ru="−30%" data-en="−30%">−30%</span>
+  </div>
+
+  <div class="pricing-grid reveal">
+    <!-- STARTER -->
+    <div class="price-card">
+      <div class="price-name" data-ru="Starter" data-en="Starter">Starter</div>
+      <div class="price-amount" id="price-starter">$9<span>/mo</span></div>
+      <div class="price-period" id="period-starter" data-ru="300 кредитов/день · 9,000/мес" data-en="300 credits/day · 9,000/mo">300 кредитов/день · 9,000/мес</div>
+      <div class="credit-bar-wrap">
+        <div class="credit-bar" style="width:25%"></div>
+      </div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> <span data-ru="Lite-модели (Gemini Flash, DeepSeek, Qwen)" data-en="Lite models (Gemini Flash, DeepSeek, Qwen)">Lite-модели (Gemini Flash, DeepSeek, Qwen)</span></li>
+        <li><span class="check">✓</span> <span data-ru="Генерация сайтов" data-en="Website generation">Генерация сайтов</span></li>
+        <li><span class="check">✓</span> <span data-ru="История чатов" data-en="Chat history">История чатов</span></li>
+        <li><span class="x">✕</span> <span style="color:var(--text-muted)" data-ru="GPT-4o / Claude / Gemini 2.5" data-en="GPT-4o / Claude / Gemini 2.5">GPT-4o / Claude / Gemini 2.5</span></li>
+        <li><span class="x">✕</span> <span style="color:var(--text-muted)" data-ru="Image Generator" data-en="Image Generator">Image Generator</span></li>
+      </ul>
+      <a href="#" class="btn btn-plan btn-outline" data-ru="Начать Starter" data-en="Start Starter">Начать Starter</a>
+    </div>
+
+    <!-- PRO -->
+    <div class="price-card popular">
+      <div class="popular-badge" data-ru="✦ Популярный" data-en="✦ Most Popular">✦ Популярный</div>
+      <div class="price-name" data-ru="Pro" data-en="Pro">Pro</div>
+      <div class="price-amount" id="price-pro">$19<span>/mo</span></div>
+      <div class="price-period" id="period-pro" data-ru="1,000 кредитов/день · 30,000/мес" data-en="1,000 credits/day · 30,000/mo">1,000 кредитов/день · 30,000/мес</div>
+      <div class="credit-bar-wrap">
+        <div class="credit-bar" style="width:60%"></div>
+      </div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> <span data-ru="Все 15+ моделей" data-en="All 15+ models">Все 15+ моделей</span></li>
+        <li><span class="check">✓</span> <span data-ru="GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro" data-en="GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro">GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro</span></li>
+        <li><span class="check">✓</span> <span data-ru="Image Generator" data-en="Image Generator">Image Generator</span></li>
+        <li><span class="check">✓</span> <span data-ru="AI Agent (автономные задачи)" data-en="AI Agent (autonomous tasks)">AI Agent (автономные задачи)</span></li>
+        <li><span class="check">✓</span> <span data-ru="Свой OpenRouter ключ" data-en="Your own OpenRouter key">Свой OpenRouter ключ</span></li>
+        <li><span class="check">✓</span> <span data-ru="Приоритетная поддержка" data-en="Priority support">Приоритетная поддержка</span></li>
+      </ul>
+      <a href="#" class="btn btn-primary btn-plan" data-ru="Начать Pro" data-en="Start Pro">Начать Pro</a>
+    </div>
+
+    <!-- ULTRA -->
+    <div class="price-card ultra-card">
+      <div class="ultra-badge" data-ru="⚡ Max Power" data-en="⚡ Max Power">⚡ Max Power</div>
+      <div class="price-name" data-ru="Ultra" data-en="Ultra">Ultra</div>
+      <div class="price-amount" id="price-ultra">$49<span>/mo</span></div>
+      <div class="price-period" id="period-ultra" data-ru="5,000 кредитов/день · 150,000/мес" data-en="5,000 credits/day · 150,000/mo">5,000 кредитов/день · 150,000/мес</div>
+      <div class="credit-bar-wrap">
+        <div class="credit-bar" style="width:100%; background: linear-gradient(90deg, #6366F1, #818CF8, #a5b4fc)"></div>
+      </div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> <span data-ru="Всё из Pro" data-en="Everything in Pro">Всё из Pro</span></li>
+        <li><span class="check">✓</span> <span data-ru="5× больше кредитов" data-en="5× more credits">5× больше кредитов</span></li>
+        <li><span class="check">✓</span> <span data-ru="Максимальный контекст" data-en="Maximum context">Максимальный контекст</span></li>
+        <li><span class="check">✓</span> <span data-ru="API доступ" data-en="API access">API доступ</span></li>
+        <li><span class="check">✓</span> <span data-ru="Выделенная поддержка" data-en="Dedicated support">Выделенная поддержка</span></li>
+        <li><span class="check">✓</span> <span data-ru="Ранний доступ к фичам" data-en="Early feature access">Ранний доступ к фичам</span></li>
+      </ul>
+      <a href="#" class="btn btn-plan btn-ultra-btn" data-ru="Начать Ultra" data-en="Start Ultra">Начать Ultra</a>
+    </div>
+  </div>
+
+  <!-- Credit cost reference -->
+  <div class="credit-info reveal">
+    <div class="credit-info-title" data-ru="Сколько стоит запрос?" data-en="How much does a request cost?">Сколько стоит запрос?</div>
+    <div class="credit-rows">
+      <div class="credit-row"><span class="model-dot" style="background:#10B981"></span><span class="model-name">Gemini Flash / Qwen / DeepSeek</span><span class="model-cost" data-ru="~1 кредит" data-en="~1 credit">~1 кредит</span></div>
+      <div class="credit-row"><span class="model-dot" style="background:#3B82F6"></span><span class="model-name">GPT-4o Mini / Gemini 2.0 Flash</span><span class="model-cost" data-ru="~5 кредитов" data-en="~5 credits">~5 кредитов</span></div>
+      <div class="credit-row"><span class="model-dot" style="background:#8B5CF6"></span><span class="model-name">GPT-4o / Claude Haiku / Gemini 2.5 Flash</span><span class="model-cost" data-ru="~15 кредитов" data-en="~15 credits">~15 кредитов</span></div>
+      <div class="credit-row"><span class="model-dot" style="background:#F59E0B"></span><span class="model-name">Claude Sonnet 4 / Opus 4.7 / Gemini 2.5 Pro</span><span class="model-cost" data-ru="~30 кредитов" data-en="~30 credits">~30 кредитов</span></div>
+      <div class="credit-row"><span class="model-dot" style="background:#EF4444"></span><span class="model-name">Claude Fable 5 ✦ / GPT-4.5</span><span class="model-cost" data-ru="~80 кредитов" data-en="~80 credits">~80 кредитов</span></div>
+      <div class="credit-row"><span class="model-dot" style="background:#EC4899"></span><span class="model-name">Image Generator</span><span class="model-cost" data-ru="~50 кредитов" data-en="~50 credits">~50 кредитов</span></div>
+    </div>
+    <div class="credit-topup" data-ru="Нужно больше? Докупить кредиты: $5 = 3,000 · $15 = 10,000 · $40 = 30,000" data-en="Need more? Top up credits: $5 = 3,000 · $15 = 10,000 · $40 = 30,000">Нужно больше? Докупить кредиты: $5 = 3,000 · $15 = 10,000 · $40 = 30,000</div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section style="background:linear-gradient(180deg,transparent,rgba(99,102,241,0.03),transparent); max-width:100%; padding-left:0; padding-right:0;">
+  <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+    <div class="reveal">
+      <div class="section-label" data-ru="Отзывы" data-en="Testimonials">Отзывы</div>
+      <div class="section-title" data-ru="Что говорят пользователи" data-en="What users say">Что говорят пользователи</div>
+    </div>
+    <div class="testimonials reveal">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text" data-ru="«Nexus AI заменил мне 5 разных подписок. ChatGPT, Midjourney, GitHub Copilot — всё в одном. Сэкономил больше $100/мес.»" data-en="«Nexus AI replaced 5 different subscriptions for me. ChatGPT, Midjourney, GitHub Copilot — all in one. Saved over $100/month.»">«Nexus AI заменил мне 5 разных подписок. ChatGPT, Midjourney, GitHub Copilot — всё в одном. Сэкономил больше $100/мес.»</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#818CF8,#6366F1);">А</div>
+          <div>
+            <div class="testi-name">Алексей К.</div>
+            <div class="testi-role" data-ru="Full-stack разработчик" data-en="Full-stack developer">Full-stack разработчик</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text" data-ru="«Сайт для клиента сгенерировал за 2 минуты. Раньше тратил день. Генератор сайтов — просто магия.»" data-en="«Generated a client website in 2 minutes. Used to take a day. The website generator is pure magic.»">«Сайт для клиента сгенерировал за 2 минуты. Раньше тратил день. Генератор сайтов — просто магия.»</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#06B6D4,#0891B2);">М</div>
+          <div>
+            <div class="testi-name">Михаил Р.</div>
+            <div class="testi-role" data-ru="Фриланс-дизайнер" data-en="Freelance designer">Фриланс-дизайнер</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text" data-ru="«Claude 4 + Gemini 2.5 в одном интерфейсе — мечта. Переключаюсь между моделями за секунду. Идеально для анализа данных.»" data-en="«Claude 4 + Gemini 2.5 in one interface — a dream. Switch between models in a second. Perfect for data analysis.»">«Claude 4 + Gemini 2.5 в одном интерфейсе — мечта. Переключаюсь между моделями за секунду. Идеально для анализа данных.»</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#10B981,#059669);">Д</div>
+          <div>
+            <div class="testi-name">Диана С.</div>
+            <div class="testi-role" data-ru="Data Scientist" data-en="Data Scientist">Data Scientist</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section id="faq">
+  <div class="reveal">
+    <div class="section-label">FAQ</div>
+    <div class="section-title" data-ru="Частые вопросы" data-en="Frequently asked questions">Частые вопросы</div>
+  </div>
+  <div class="faq reveal">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span data-ru="Нужен ли свой API ключ?" data-en="Do I need my own API key?">Нужен ли свой API ключ?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a" data-ru="Нет. На Free и Pro планах мы предоставляем кредиты. Но ты можешь подключить свой OpenRouter ключ для неограниченного доступа по оптимальным ценам." data-en="No. On Free and Pro plans we provide credits. But you can connect your own OpenRouter key for unlimited access at optimal prices.">Нет. На Free и Pro планах мы предоставляем кредиты. Но ты можешь подключить свой OpenRouter ключ для неограниченного доступа по оптимальным ценам.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span data-ru="Какие модели доступны?" data-en="Which models are available?">Какие модели доступны?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a" data-ru="GPT-4o, GPT-4o Mini, Claude Sonnet 4, Claude Opus 4.7, Claude Fable 5, Gemini 2.5 Pro, Gemini Flash, DeepSeek R1, Qwen, Kimi и другие. Регулярно добавляем новые." data-en="GPT-4o, GPT-4o Mini, Claude Sonnet 4, Claude Opus 4.7, Claude Fable 5, Gemini 2.5 Pro, Gemini Flash, DeepSeek R1, Qwen, Kimi and more. Updated regularly.">GPT-4o, GPT-4o Mini, Claude Sonnet 4, Claude Opus 4.7, Claude Fable 5, Gemini 2.5 Pro, Gemini Flash, DeepSeek R1, Qwen, Kimi и другие. Регулярно добавляем новые.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span data-ru="Можно отменить подписку?" data-en="Can I cancel my subscription?">Можно отменить подписку?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a" data-ru="Да, в любой момент без штрафов. После отмены доступ к Pro сохраняется до конца оплаченного периода." data-en="Yes, anytime with no penalties. After cancellation, Pro access remains until the end of the paid period.">Да, в любой момент без штрафов. После отмены доступ к Pro сохраняется до конца оплаченного периода.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span data-ru="Работает ли на мобильном?" data-en="Does it work on mobile?">Работает ли на мобильном?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a" data-ru="Да. Nexus AI — прогрессивное веб-приложение (PWA). Добавь в Home Screen на iPhone или Android и пользуйся как нативным приложением." data-en="Yes. Nexus AI is a progressive web app (PWA). Add to Home Screen on iPhone or Android and use it like a native app.">Да. Nexus AI — прогрессивное веб-приложение (PWA). Добавь в Home Screen на iPhone или Android и пользуйся как нативным приложением.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span data-ru="Безопасны ли мои данные?" data-en="Is my data safe?">Безопасны ли мои данные?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a" data-ru="Мы не храним содержимое чатов на наших серверах после сессии. Данные шифруются при передаче. Твой API ключ хранится только локально в браузере." data-en="We don't store chat content on our servers after the session. Data is encrypted in transit. Your API key is stored only locally in the browser.">Мы не храним содержимое чатов на наших серверах после сессии. Данные шифруются при передаче. Твой API ключ хранится только локально в браузере.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<div class="cta-section">
+  <div class="cta-orb"></div>
+  <h2 class="reveal" data-ru="Начни прямо сейчас" data-en="Start right now">Начни прямо сейчас</h2>
+  <p class="reveal" data-ru="Присоединяйся и получи доступ ко всем AI-моделям бесплатно." data-en="Join and get access to all AI models for free.">Присоединяйся и получи доступ ко всем AI-моделям бесплатно.</p>
+  <div class="cta-btns reveal">
+    <a href="#pricing" class="btn btn-primary btn-primary-lg" data-ru="✦ Начать бесплатно" data-en="✦ Start for free">✦ Начать бесплатно</a>
+    <a href="#features" class="btn btn-ghost btn-ghost-lg" data-ru="Посмотреть возможности" data-en="See features">Посмотреть возможности</a>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="margin-bottom:0;">
+        <div class="nav-logo-icon">✦</div>
+        <span class="nav-logo-text">Nexus AI</span>
+      </a>
+      <p data-ru="Премиальный AI-ассистент для разработчиков, дизайнеров и команд." data-en="Premium AI assistant for developers, designers and teams.">Премиальный AI-ассистент для разработчиков, дизайнеров и команд.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4 data-ru="Продукт" data-en="Product">Продукт</h4>
+        <a href="#features" data-ru="Возможности" data-en="Features">Возможности</a>
+        <a href="#pricing" data-ru="Цены" data-en="Pricing">Цены</a>
+        <a href="#how" data-ru="Как работает" data-en="How it works">Как работает</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-ru="Инструменты" data-en="Tools">Инструменты</h4>
+        <a href="#" data-ru="AI Chat" data-en="AI Chat">AI Chat</a>
+        <a href="#" data-ru="Web Builder" data-en="Web Builder">Web Builder</a>
+        <a href="#" data-ru="Image Gen" data-en="Image Gen">Image Gen</a>
+        <a href="#" data-ru="Code Editor" data-en="Code Editor">Code Editor</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-ru="Компания" data-en="Company">Компания</h4>
+        <a href="#faq" data-ru="FAQ" data-en="FAQ">FAQ</a>
+        <a href="#" data-ru="Политика конфиденциальности" data-en="Privacy Policy">Политика конфиденциальности</a>
+        <a href="#" data-ru="Условия использования" data-en="Terms of Service">Условия использования</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p data-ru="© 2025 Nexus AI. Все права защищены." data-en="© 2025 Nexus AI. All rights reserved.">© 2025 Nexus AI. Все права защищены.</p>
+    <p data-ru="Сделано с ✦ для разработчиков" data-en="Made with ✦ for developers">Сделано с ✦ для разработчиков</p>
+  </div>
+</footer>
+
+<script>
+  // ── Lang Switcher ──
+  let currentLang = 'ru';
+  function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
+    document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+      const val = el.getAttribute('data-' + lang);
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = val;
+      else el.innerHTML = val;
+    });
+  }
+
+  // ── Billing Toggle ──
+  const PRICES = {
+    monthly: { starter: '$9', pro: '$19', ultra: '$49', starterP: '300 кредитов/день · 9,000/мес', proP: '1,000 кредитов/день · 30,000/мес', ultraP: '5,000 кредитов/день · 150,000/мес' },
+    annual:  { starter: '$6', pro: '$13', ultra: '$34', starterP: '300 кредитов/день · 9,000/мес', proP: '1,000 кредитов/день · 30,000/мес', ultraP: '5,000 кредитов/день · 150,000/мес' },
+  };
+  function setBilling(mode) {
+    const p = PRICES[mode];
+    document.getElementById('toggle-monthly').classList.toggle('active', mode === 'monthly');
+    document.getElementById('toggle-annual').classList.toggle('active', mode === 'annual');
+    document.getElementById('price-starter').innerHTML = p.starter + '<span>/mo</span>';
+    document.getElementById('price-pro').innerHTML = p.pro + '<span>/mo</span>';
+    document.getElementById('price-ultra').innerHTML = p.ultra + '<span>/mo</span>';
+    document.getElementById('period-starter').textContent = p.starterP;
+    document.getElementById('period-pro').textContent = p.proP;
+    document.getElementById('period-ultra').textContent = p.ultraP;
+  }
+
+  // ── Ticker ──
+  const MODELS = [
+    { name: 'GPT-4o', color: '#10B981' },
+    { name: 'Claude Fable 5 ✦', color: '#F59E0B' },
+    { name: 'Gemini 2.5 Pro', color: '#06B6D4' },
+    { name: 'Claude Opus 4.7', color: '#F59E0B' },
+    { name: 'DeepSeek R1', color: '#818CF8' },
+    { name: 'Qwen 3', color: '#EC4899' },
+    { name: 'Kimi k2', color: '#EF4444' },
+    { name: 'GPT-4o Mini', color: '#10B981' },
+    { name: 'Claude Sonnet 4', color: '#F59E0B' },
+    { name: 'Claude Haiku', color: '#a78bfa' },
+    { name: 'Gemini Flash', color: '#06B6D4' },
+    { name: 'Llama 3.3', color: '#6366F1' },
+  ];
+  const ticker = document.getElementById('ticker');
+  const items = [...MODELS, ...MODELS].map(m =>
+    `<div class="ticker-item"><div class="dot" style="background:${m.color}"></div>${m.name}</div>`
+  ).join('');
+  ticker.innerHTML = items;
+
+  // ── Reveal on scroll ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── FAQ ──
+  function toggleFaq(el) {
+    const item = el.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  // ── Nav active on scroll ──
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.7)';
+  });
+</script>
+</body>
+</html>
